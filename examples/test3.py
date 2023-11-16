@@ -1,4 +1,4 @@
-import trafficSimulator as ts
+import trafficsim as ts
 
 sim = ts.Simulation()
 

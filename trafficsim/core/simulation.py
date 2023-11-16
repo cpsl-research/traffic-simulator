@@ -1,8 +1,8 @@
-from .vehicle_generator import VehicleGenerator
-from .geometry.quadratic_curve import QuadraticCurve
 from .geometry.cubic_curve import CubicCurve
-from .geometry.segment import Segment
+from .geometry.quadratic_curve import QuadraticCurve
+from .geometry.straight_curve import StraightCurve
 from .vehicle import Vehicle
+from .vehicle_generator import VehicleGenerator
 
 
 class Simulation:
@@ -13,8 +13,7 @@ class Simulation:
 
         self.t = 0.0
         self.frame_count = 0
-        self.dt = 1/60  
-
+        self.dt = 1 / 60
 
     def add_vehicle(self, veh):
         self.vehicles[veh.id] = veh
@@ -27,13 +26,12 @@ class Simulation:
     def add_vehicle_generator(self, gen):
         self.vehicle_generator.append(gen)
 
-    
     def create_vehicle(self, **kwargs):
         veh = Vehicle(kwargs)
         self.add_vehicle(veh)
 
-    def create_segment(self, *args):
-        seg = Segment(args)
+    def create_straight_segment(self, *args):
+        seg = StraightCurve(args)
         self.add_segment(seg)
 
     def create_quadratic_bezier_curve(self, start, control, end):
@@ -48,7 +46,6 @@ class Simulation:
         gen = VehicleGenerator(kwargs)
         self.add_vehicle_generator(gen)
 
-
     def run(self, steps):
         for _ in range(steps):
             self.update()
@@ -59,12 +56,15 @@ class Simulation:
             if len(segment.vehicles) != 0:
                 self.vehicles[segment.vehicles[0]].update(None, self.dt)
             for i in range(1, len(segment.vehicles)):
-                self.vehicles[segment.vehicles[i]].update(self.vehicles[segment.vehicles[i-1]], self.dt)
+                self.vehicles[segment.vehicles[i]].update(
+                    self.vehicles[segment.vehicles[i - 1]], self.dt
+                )
 
         # Check roads for out of bounds vehicle
         for segment in self.segments:
             # If road has no vehicles, continue
-            if len(segment.vehicles) == 0: continue
+            if len(segment.vehicles) == 0:
+                continue
             # If not
             vehicle_id = segment.vehicles[0]
             vehicle = self.vehicles[vehicle_id]
@@ -80,7 +80,7 @@ class Simulation:
                 # Reset vehicle properties
                 vehicle.x = 0
                 # In all cases, remove it from its road
-                segment.vehicles.popleft() 
+                segment.vehicles.popleft()
 
         # Update vehicle generators
         for gen in self.vehicle_generator:
